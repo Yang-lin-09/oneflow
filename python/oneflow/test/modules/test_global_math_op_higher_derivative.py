@@ -41,11 +41,24 @@ def _global_math_op_grad_grad_impl(test_case, op_name, placement, sbp):
         )
     )
 
-    x_grad_grad = torch.autograd.grad(x_grad, x, init_grad, retain_graph=True)[0]
+    x_grad_grad = torch.autograd.grad(x_grad, x, init_grad, create_graph=True)[0]
     test_case.assertTrue(
         np.allclose(
             x_grad_grad.pytorch.detach().cpu().numpy(),
             x_grad_grad.oneflow.detach().numpy(),
+            atol=1e-4,
+            rtol=1e-4,
+            equal_nan=True,
+        )
+    )
+    
+    x_grad_grad_grad = torch.autograd.grad(
+        x_grad_grad, x, init_grad, retain_graph=True
+    )[0]
+    test_case.assertTrue(
+        np.allclose(
+            x_grad_grad_grad.pytorch.detach().cpu().numpy(),
+            x_grad_grad_grad.oneflow.detach().numpy(),
             atol=1e-4,
             rtol=1e-4,
             equal_nan=True,
